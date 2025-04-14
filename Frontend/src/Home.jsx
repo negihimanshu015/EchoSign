@@ -1,8 +1,12 @@
 import React from 'react';
 import homeImg from './assets/home_img.png';
+import { useNavigate } from 'react-router-dom';
 import { FaHandPaper, FaGamepad, FaChartLine, FaUserFriends, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 
 const HomePage = () => {
+
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Navigation Bar */}
@@ -39,7 +43,7 @@ const HomePage = () => {
               Master American Sign Language with our interactive platform featuring live sign recognition, personalized lessons, and gamified learning.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
+              <button onClick={() => navigate('/Learning')} className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
                 Get Started - It's Free
               </button>
               <button className="px-8 py-4 border-2 border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition">

@@ -3,6 +3,7 @@ import homeImg from './assets/home_img.png';
 import { useNavigate } from 'react-router-dom';
 import { FaHandPaper, FaGamepad, FaChartLine, FaUserFriends, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 
+
 const HomePage = () => {
 
   const navigate = useNavigate();
@@ -15,20 +16,7 @@ const HomePage = () => {
           <div className="flex items-center space-x-2">
             <FaHandPaper className="text-blue-600 text-2xl" />
             <span className="text-xl font-bold text-blue-800">EchoSign</span>
-          </div>
-          <div className="hidden md:flex space-x-8">
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Lessons</a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Practice</a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Profile</a>
-          </div>
-          <div className="flex space-x-4">
-            <button className="px-4 py-2 text-blue-600 font-medium rounded-lg hover:bg-blue-50 flex items-center">
-              <FaSignInAlt className="mr-2" /> Sign In
-            </button>
-            <button className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center">
-              <FaUserPlus className="mr-2" /> Register
-            </button>
-          </div>
+          </div>                    
         </div>
       </nav>
 
@@ -45,10 +33,7 @@ const HomePage = () => {
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <button onClick={() => navigate('/Learning')} className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
                 Get Started - It's Free
-              </button>
-              <button className="px-8 py-4 border-2 border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition">
-                Watch Demo
-              </button>
+              </button>              
             </div>
           </div>
           <div className="relative">
@@ -73,7 +58,7 @@ const HomePage = () => {
                 <FaHandPaper className="text-blue-600 text-2xl" />
               </div>
               <h3 className="text-xl font-bold mb-2">Live Sign Recognition</h3>
-              <p className="text-gray-600">Our AI technology provides instant feedback on your signing accuracy.</p>
+              <p className="text-gray-600">Our ML technology provides instant feedback on your signing accuracy.</p>
             </div>
             <div className="bg-purple-50 p-6 rounded-xl hover:shadow-md transition">
               <div className="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center mb-4">
@@ -108,7 +93,7 @@ const HomePage = () => {
             Join thousands of learners who have successfully mastered American Sign Language with our platform.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <button className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg">
+            <button onClick={() => navigate('/Learning')} className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg">
               Get Started - It's Free
             </button>
             <button className="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-blue-700 transition">

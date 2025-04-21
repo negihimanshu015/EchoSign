@@ -32,8 +32,11 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <button onClick={() => navigate('/Learning')} className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
-                Get Started - It's Free
-              </button>              
+                Get Started
+              </button>
+              <button onClick={() => navigate('/LearnMore')} className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg">
+              Learn More
+            </button>              
             </div>
           </div>
           <div className="relative">
@@ -48,42 +51,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-16 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Why Learn With Us</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-blue-50 p-6 rounded-xl hover:shadow-md transition">
-              <div className="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center mb-4">
-                <FaHandPaper className="text-blue-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Live Sign Recognition</h3>
-              <p className="text-gray-600">Our ML technology provides instant feedback on your signing accuracy.</p>
-            </div>
-            <div className="bg-purple-50 p-6 rounded-xl hover:shadow-md transition">
-              <div className="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center mb-4">
-                <FaGamepad className="text-purple-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Gamified Learning</h3>
-              <p className="text-gray-600">Earn points, badges, and level up as you master ASL.</p>
-            </div>
-            <div className="bg-green-50 p-6 rounded-xl hover:shadow-md transition">
-              <div className="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center mb-4">
-                <FaChartLine className="text-green-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Personalized Progress</h3>
-              <p className="text-gray-600">Adaptive lessons tailored to your learning pace and style.</p>
-            </div>
-            <div className="bg-orange-50 p-6 rounded-xl hover:shadow-md transition">
-              <div className="bg-orange-100 w-14 h-14 rounded-full flex items-center justify-center mb-4">
-                <FaUserFriends className="text-orange-600 text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Community Support</h3>
-              <p className="text-gray-600">Connect with other learners and native signers for practice.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       {/* CTA Section */}
       <section className="py-20 px-6 bg-blue-600 text-white">
@@ -94,9 +62,9 @@ const HomePage = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <button onClick={() => navigate('/Learning')} className="px-8 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg">
-              Get Started - It's Free
+              Get Started
             </button>
-            <button className="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-blue-700 transition">
+            <button onClick={() => navigate('/LearnMore')} className="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-blue-700 transition">
               Learn More
             </button>
           </div>

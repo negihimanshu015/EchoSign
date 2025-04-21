@@ -326,7 +326,7 @@ const LearningPage = () => {
     formData.append("file", blob, "frame.jpg");
 
     try {
-      const response = await axios.post("http://localhost:8000/predict", formData, {
+      const response = await axios.post("https://echosign.onrender.com/predict", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

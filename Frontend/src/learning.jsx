@@ -292,7 +292,7 @@ const LearningPage = () => {
     formData.append("file", blob, "frame.jpg");
 
     try {
-      const response = await axios.post("https://echosign.onrender.com/predict", formData, {
+      const response = await axios.post("https://dusty-noel-negihimanshu015-8d53b982.koyeb.app/predict", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

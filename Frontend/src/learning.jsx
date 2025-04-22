@@ -17,17 +17,9 @@ const LearningPage = () => {
   const webcamRef = useRef(null);
   
   const [showDemo, setShowDemo] = useState(true);
-  const [progress, setProgress] = useState({
-    correctAttempts: 0,
-    totalAttempts: 0,
-    streak: 0,
-  });
-  const [sessionGoal, setSessionGoal] = useState(5);
-  const [sessionCorrect, setSessionCorrect] = useState(0);
   const [challengeMode, setChallengeMode] = useState(false);
   const [currentChallenge, setCurrentChallenge] = useState([]);
   const [currentChallengeStep, setCurrentChallengeStep] = useState(0);
-  const [feedbackHistory, setFeedbackHistory] = useState([]);
 
   
   const [learningPathMode, setLearningPathMode] = useState(false);
@@ -225,21 +217,11 @@ const LearningPage = () => {
   
   useEffect(() => {
     if (prediction === targetSign && accuracy >= 85) {      
-      setProgress((prev) => ({
-        correctAttempts: prev.correctAttempts + 1,
-        totalAttempts: prev.totalAttempts + 1,
-        streak: prev.streak + 1,
-      }));
-      
-      const newCorrect = Math.min(sessionCorrect + 1, sessionGoal);
-      setSessionCorrect(newCorrect);
-      
-      if (learningPathMode && newCorrect === sessionGoal) {
+      if (learningPathMode) {
         if (currentLearningPathIndex < ASL_ALPHABET.length - 1) {
           const nextIndex = currentLearningPathIndex + 1;
           setCurrentLearningPathIndex(nextIndex);
           setTargetSign(ASL_ALPHABET[nextIndex]);
-          setSessionCorrect(0);
         }
       }      
       else if (challengeMode && currentChallengeStep < currentChallenge.length - 1) {
@@ -253,23 +235,11 @@ const LearningPage = () => {
           setCompletedLetters([...completedLetters, targetSign]);
         }
       }
-    } else if (prediction !== targetSign && accuracy >= 85) {
-      setProgress((prev) => ({
-        ...prev,
-        totalAttempts: prev.totalAttempts + 1,
-        streak: 0,
-      }));
-      setFeedbackHistory((prev) => [
-        ...prev.slice(-2),
-        `Try adjusting ${signInstructions[targetSign]?.commonMistakes[0] || "your hand position"}`,
-      ]);
     }
   }, [
     prediction,
     accuracy,
     targetSign,
-    sessionGoal,
-    sessionCorrect,
     learningPathMode,
     currentLearningPathIndex,
     challengeMode,
@@ -293,8 +263,6 @@ const LearningPage = () => {
     setTargetSign(randomChallenge[0]);
     setChallengeMode(true);
     setLearningPathMode(false);
-    setSessionCorrect(0);
-    setSessionGoal(randomChallenge.length);
   };
   
   const startLearningPath = () => {
@@ -304,8 +272,6 @@ const LearningPage = () => {
     setTargetSign(ASL_ALPHABET[firstUncompleted]);
     setLearningPathMode(true);
     setChallengeMode(false);
-    setSessionCorrect(0);
-    setSessionGoal(3); 
   };
   
   const captureAndPredict = useCallback(async () => {
@@ -459,44 +425,25 @@ const LearningPage = () => {
                 </ul>
               </div>
 
-              {feedbackHistory.length > 0 && (
-                <div className="p-4 bg-red-50 rounded-lg">
-                  <h4 className="font-semibold mb-2">Recent Feedback</h4>
-                  {feedbackHistory.map((fb, i) => (
-                    <div key={i} className="text-sm text-red-600">
-                      • {fb}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
           {/* Right Panel: Progress Info */}
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <div className="grid grid-cols-3 gap-4 text-center mb-4">
+              <div className="grid grid-cols-2 gap-4 text-center mb-4">
                 <div className="p-3 bg-green-50 rounded-lg">
                   <div className="text-sm text-gray-600">Mastered Letters</div>
                   <div className="text-2xl font-bold">
                     {completedLetters.length}
                   </div>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Session Progress</div>
-                  <div className="text-2xl font-bold">
-                    {sessionCorrect}/{sessionGoal}
-                  </div>
+              <div className="p-3 bg-purple-50 rounded-lg">
+                <div className="text-sm text-gray-600">Accuracy</div>
+                <div className="text-2xl font-bold">
+                  {accuracy}%
                 </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <div className="text-sm text-gray-600">Accuracy</div>
-                  <div className="text-2xl font-bold">
-                    {Math.round(
-                      (progress.correctAttempts / (progress.totalAttempts || 1)) * 100
-                    )}
-                    %
-                  </div>
-                </div>
+              </div>
               </div>
 
               <div className="p-4 bg-yellow-50 rounded-lg">
@@ -561,13 +508,13 @@ const LearningPage = () => {
                     </div>
                   ))}
                 </div>
-                <div className="bg-gray-100 p-3 rounded-lg">
+  <div className="bg-gray-100 p-3 rounded-lg">
                   {currentLearningPathIndex >= ASL_ALPHABET.length ? (
                     <div className="text-center text-green-600 font-bold">
                       Congratulations! You've completed the alphabet! 🎉
                     </div>
                   ) : (
-                    `Current Target: ${ASL_ALPHABET[currentLearningPathIndex]} (${sessionCorrect}/${sessionGoal})`
+                    `Current Target: ${ASL_ALPHABET[currentLearningPathIndex]}`
                   )}
                 </div>
               </div>

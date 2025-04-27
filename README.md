@@ -48,6 +48,24 @@ The frontend is built using React and Vite. It provides a user-friendly interfac
    npm run dev
    ```
 
+**Note:** If you want to run this project locally, update the following line in `Frontend/src/learning.jsx`:
+
+```js
+try {
+  const response = await axios.post("https://dusty-noel-negihimanshu015-8d53b982.koyeb.app/predict", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+```
+
+to point to your local server, for example:
+
+```js
+try {
+  const response = await axios.post("http://localhost:8000/predict", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+```
+
 ## Installation Instructions
 
 To set up the project, clone the repository and install the dependencies for both the backend and frontend.

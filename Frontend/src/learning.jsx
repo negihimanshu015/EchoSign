@@ -1,229 +1,180 @@
-import React, { useState, useEffect } from "react";
-import Webcam from "react-webcam";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ASL_ALPHABET, signInstructions } from "./data/aslData";
 import { useWebcamPredict } from "./hooks/useWebcamPredict";
-import LetterSelector from "./components/LetterSelector";
-import ProgressInfo from "./components/ProgressInfo";
-import ChallengePanel from "./components/ChallengePanel";
-import LearningPathPanel from "./components/LearningPathPanel";
 import { useNavigate } from 'react-router-dom';
+
+// New Components
+import SignCard from "./components/SignCard";
+import CameraPanel from "./components/CameraPanel";
+import AlphabetMap from "./components/AlphabetMap";
+import SuccessOverlay from "./components/SuccessOverlay";
 
 const LearningPage = () => {
   const navigate = useNavigate();
-  const { accuracy, prediction, isPredicting, setIsPredicting, webcamRef } = useWebcamPredict();
+  const hasInitialized = useRef(false);
+  
+  // -- PERSISTENCE --
+  const [completedLetters, setCompletedLetters] = useState(() => {
+    const saved = localStorage.getItem('echosign_mastered');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [sessionCount, setSessionCount] = useState(() => {
+    const saved = localStorage.getItem('echosign_sessions');
+    return saved ? parseInt(saved, 10) : 0;
+  });
 
   const [targetSign, setTargetSign] = useState("A");
-  const [completedLetters, setCompletedLetters] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [reviewLetters, setReviewLetters] = useState([]);
 
-  const [showDemo, setShowDemo] = useState(true);
-  const [challengeMode, setChallengeMode] = useState(false);
-  const [currentChallenge, setCurrentChallenge] = useState([]);
-  const [currentChallengeStep, setCurrentChallengeStep] = useState(0);
+  // -- PREDICTION HOOK --
+  const { 
+    accuracy, 
+    prediction, 
+    isPredicting, 
+    setIsPredicting, 
+    webcamRef, 
+    streak, 
+    streakRequired, 
+    isConfirmed,
+    setIsConfirmed,
+    resetStreak
+  } = useWebcamPredict(targetSign);
 
-  const [learningPathMode, setLearningPathMode] = useState(false);
-  const [currentLearningPathIndex, setCurrentLearningPathIndex] = useState(0);
-
-  useEffect(() => {
-    if (prediction === targetSign && accuracy >= 85) {
-      if (learningPathMode) {
-        if (currentLearningPathIndex < ASL_ALPHABET.length - 1) {
-          const nextIndex = currentLearningPathIndex + 1;
-          setCurrentLearningPathIndex(nextIndex);
-          setTargetSign(ASL_ALPHABET[nextIndex]);
-        }
-      }
-      else if (challengeMode && currentChallengeStep < currentChallenge.length - 1) {
-        const nextStep = currentChallengeStep + 1;
-        setCurrentChallengeStep(nextStep);
-        setTargetSign(currentChallenge[nextStep]);
-      }
-      else if (!learningPathMode && !challengeMode) {
-        const currentIndex = ASL_ALPHABET.indexOf(targetSign);
-        if (currentIndex < ASL_ALPHABET.length - 1 && !completedLetters.includes(targetSign)) {
-          setCompletedLetters([...completedLetters, targetSign]);
-        }
-      }
+  // -- SESSION QUEUE LOGIC --
+  const getNextTarget = useCallback((mastered, sessions) => {
+    // 1. Surface a review letter every 3rd session if any mastered
+    if (sessions > 0 && sessions % 3 === 0 && mastered.length > 0) {
+      const review = mastered[Math.floor(Math.random() * mastered.length)];
+      setReviewLetters([review]);
+      return review;
     }
-  }, [
-    prediction,
-    accuracy,
-    targetSign,
-    learningPathMode,
-    currentLearningPathIndex,
-    challengeMode,
-    currentChallenge,
-    currentChallengeStep,
-    completedLetters,
-  ]);
-
-  const startChallenge = () => {
-    const challengeLetters = ASL_ALPHABET.filter(l => completedLetters.includes(l));
-    if (challengeLetters.length < 3) return;
-
-    const randomChallenge = [];
-    while (randomChallenge.length < 5) {
-      const randomLetter = challengeLetters[Math.floor(Math.random() * challengeLetters.length)];
-      randomChallenge.push(randomLetter);
-    }
-
-    setCurrentChallenge(randomChallenge);
-    setCurrentChallengeStep(0);
-    setTargetSign(randomChallenge[0]);
-    setChallengeMode(true);
-    setLearningPathMode(false);
-  };
-
-  const startLearningPath = () => {
-    const firstUncompleted = ASL_ALPHABET.findIndex(l => !completedLetters.includes(l));
-    if (firstUncompleted === -1) return;
-    setCurrentLearningPathIndex(firstUncompleted);
-    setTargetSign(ASL_ALPHABET[firstUncompleted]);
-    setLearningPathMode(true);
-    setChallengeMode(false);
-  };
-
-  useEffect(() => {
-    const visitedBefore = localStorage.getItem("visited");
-    if (!visitedBefore) {
-      setShowDemo(true);
-      localStorage.setItem("visited", "true");
-    }
+    // 2. Next unlearned letter in alphabet
+    const next = ASL_ALPHABET.find(l => !mastered.includes(l));
+    return next ?? mastered[0];
   }, []);
 
+  // Initialize target sign on mount
+  useEffect(() => {
+    if (!hasInitialized.current) {
+        setSessionCount(prev => {
+            const next = prev + 1;
+            localStorage.setItem('echosign_sessions', next.toString());
+            // Need to calculate next target with the fresh session count
+            setTargetSign(getNextTarget(completedLetters, next));
+            return next;
+        });
+        hasInitialized.current = true;
+    }
+  }, [completedLetters, getNextTarget]);
+
+  // Sync mastered letters to localStorage
+  useEffect(() => {
+    localStorage.setItem('echosign_mastered', JSON.stringify(completedLetters));
+  }, [completedLetters]);
+
+  // -- HANDLERS --
+  const handleSuccess = useCallback(() => {
+    setCompletedLetters(prev => {
+        if (!prev.includes(targetSign)) {
+            return [...prev, targetSign];
+        }
+        return prev;
+    });
+    setShowSuccess(true);
+  }, [targetSign]);
+
+  const advanceQueue = useCallback(() => {
+    setShowSuccess(false);
+    setIsConfirmed(false);
+    resetStreak();
+    
+    // We pass the potentially updated completedLetters if we just mastered it
+    setTargetSign(getNextTarget(completedLetters, sessionCount));
+  }, [completedLetters, sessionCount, getNextTarget, resetStreak, setIsConfirmed]);
+
+  // Effect to trigger success overlay when hook confirms
+  useEffect(() => {
+    if (isConfirmed) {
+      handleSuccess();
+    }
+  }, [isConfirmed, handleSuccess]);
+
+  const handleManualConfirm = () => {
+    setIsConfirmed(true);
+    handleSuccess();
+  };
+
+  const jumpToLetter = (letter) => {
+    setTargetSign(letter);
+    resetStreak();
+    setIsConfirmed(false);
+  };
+
+  const isMotion = signInstructions[targetSign]?.isMotion;
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
-      <header className="py-8 px-8 md:px-12 lg:px-24 flex justify-between items-center slide-up">
-        <div className="display-font text-2xl font-bold tracking-tight cursor-pointer" onClick={() => navigate('/')}>EchoSign</div>
-        <nav className="flex gap-8 text-sm uppercase tracking-widest text-[#868e96]">
-          <button className="link-hover text-[#212529]">Practice</button>
-          <button onClick={() => navigate('/LearnMore')} className="link-hover">About</button>
-        </nav>
+    <div className="min-h-screen flex flex-col bg-[#0a0a0a] text-[#f8f9fa] overflow-hidden">
+      {showSuccess && (
+        <SuccessOverlay letter={targetSign} onComplete={advanceQueue} />
+      )}
+
+      {/* Header */}
+      <header className="h-20 flex items-center justify-between px-8 border-b border-[#1a1a1a]">
+        <div className="flex items-center gap-4">
+          <div 
+            className="display-font text-xl font-bold tracking-tighter cursor-pointer hover:text-[#caf0f8] transition-colors" 
+            onClick={() => navigate('/')}
+          >
+            ECHOSIGN
+          </div>
+        </div>
+        
+        <button 
+          onClick={() => navigate('/')}
+          className="text-[10px] uppercase tracking-widest text-[#f8f9fa] hover:text-[#caf0f8] transition-colors font-bold"
+        >
+          [ Exit ]
+        </button>
       </header>
 
-      <main className="flex-1 px-8 md:px-12 lg:px-24 pb-16 slide-up" style={{ animationDelay: '0.1s' }}>
-        <div className="mb-12">
-          <div className="text-xs uppercase tracking-widest text-[#adb5bd] mb-4">Module 01</div>
-          <h1 className="text-5xl md:text-6xl display-font leading-none mb-6">Alphabet <br /> <span className="text-[#caf0f8]">Mastery.</span></h1>
-          <div className="thin-line mb-8"></div>
-          
-          <LetterSelector
-            targetSign={targetSign}
-            completedLetters={completedLetters}
-            setTargetSign={setTargetSign}
-            setChallengeMode={setChallengeMode}
-            setLearningPathMode={setLearningPathMode}
+      {/* Main Workspace */}
+      <main className="flex-1 flex flex-col md:flex-row">
+        {/* Left Panel: Target & Instructions */}
+        <div className="w-full md:w-1/3 lg:w-1/4 border-r border-[#1a1a1a]">
+          <SignCard 
+            letter={targetSign} 
+            onManualConfirm={handleManualConfirm} 
           />
         </div>
 
-        <div className="grid md:grid-cols-12 gap-16">
-          {/* Left Panel: Webcam, Prediction, and Instructions */}
-          <div className="md:col-span-7 flex flex-col slide-up" style={{ animationDelay: '0.2s' }}>
-            <div className="aspect-video bg-[#e9ecef] border border-[#dee2e6] relative group overflow-hidden">
-              <Webcam
-                ref={webcamRef}
-                className="w-full h-full object-cover"
-                screenshotFormat="image/jpeg"
-                mirrored
-              />
-              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 text-sm font-light border border-[#dee2e6]">
-                <span className="font-bold">{prediction || '-'}</span> ({accuracy || 0}%)
-              </div>
-            </div>
-
-            <div className="mt-8">
-              {/* Mode Selection Buttons */}
-              <div className="flex gap-4 mb-8">
-                <button
-                  onClick={() => setIsPredicting(!isPredicting)}
-                  className={`px-8 py-3 rounded-full text-sm font-light transition-colors ${
-                    isPredicting
-                      ? "bg-[#495057] text-white hover:bg-[#212529]"
-                      : "bg-[#212529] text-white hover:bg-[#343a40]"
-                  }`}
-                >
-                  {isPredicting ? "Stop Camera" : "Start Camera"}
-                </button>
-
-                <button
-                  onClick={startLearningPath}
-                  className={`px-8 py-3 rounded-full text-sm font-light border transition-colors ${
-                    learningPathMode 
-                      ? "bg-[#e9ecef] border-[#ced4da] text-[#495057]" 
-                      : "border-[#212529] text-[#212529] hover:bg-[#f1f3f5]"
-                  }`}
-                  disabled={completedLetters.length === ASL_ALPHABET.length}
-                >
-                  {learningPathMode ? "Path Active" : "Start Path"}
-                </button>
-
-                <button
-                  onClick={startChallenge}
-                  className={`px-8 py-3 rounded-full text-sm font-light border transition-colors ${
-                    challengeMode 
-                      ? "bg-[#e9ecef] border-[#ced4da] text-[#495057]" 
-                      : "border-[#212529] text-[#212529] hover:bg-[#f1f3f5]"
-                  }`}
-                  disabled={completedLetters.length < 3}
-                >
-                  {challengeMode ? "Challenge Active" : "Start Challenge"}
-                </button>
-              </div>
-
-              <div className="pt-6 border-t border-[#dee2e6]">
-                <h3 className="display-font text-xl mb-4">How to sign '{targetSign}'</h3>
-                <ul className="space-y-3">
-                  {signInstructions[targetSign]?.steps.map((step, i) => (
-                    <li key={i} className="text-[#6c757d] font-light flex gap-4">
-                      <span className="text-[#adb5bd] font-bold text-sm">0{i + 1}</span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Panel: Progress Info */}
-          <div className="md:col-span-5 flex flex-col slide-up" style={{ animationDelay: '0.3s' }}>
-            <ProgressInfo completedLetters={completedLetters} accuracy={accuracy} />
-
-            {/* Challenge Mode Panel */}
-            {challengeMode && (
-              <ChallengePanel
-                currentChallenge={currentChallenge}
-                currentChallengeStep={currentChallengeStep}
-              />
-            )}
-
-            {/* Learning Path Panel */}
-            {learningPathMode && (
-              <LearningPathPanel
-                currentLearningPathIndex={currentLearningPathIndex}
-              />
-            )}
-
-            <div className="mt-8 pt-8 border-t border-[#dee2e6]">
-              <h3 className="display-font text-xl mb-6">Learning Guide</h3>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-bold text-sm uppercase tracking-widest text-[#495057] mb-2">Accuracy Metric</h4>
-                  <p className="text-[#6c757d] font-light leading-relaxed">
-                    The percentage indicates the system's confidence in recognizing your gesture. Maintain 85%+ consistently to master each letter.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm uppercase tracking-widest text-[#495057] mb-2">Progression</h4>
-                  <p className="text-[#6c757d] font-light leading-relaxed">
-                    Letters unlock sequentially as you demonstrate proficiency. Complete the required accurate attempts to advance.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Right Panel: Camera */}
+        <div className="flex-1 bg-[#0a0a0a]">
+          <CameraPanel
+            webcamRef={webcamRef}
+            isPredicting={isPredicting}
+            setIsPredicting={setIsPredicting}
+            prediction={prediction}
+            accuracy={accuracy}
+            streak={streak}
+            streakRequired={streakRequired}
+            isMotion={isMotion}
+          />
         </div>
       </main>
+
+      {/* Bottom: Alphabet Map */}
+      <AlphabetMap 
+        completedLetters={completedLetters}
+        activeLetter={targetSign}
+        onSelect={jumpToLetter}
+        reviewLetters={reviewLetters}
+      />
     </div>
   );
 };
 
 export default LearningPage;
+
+

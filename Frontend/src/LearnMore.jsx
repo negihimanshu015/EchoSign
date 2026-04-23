@@ -1,102 +1,105 @@
-import { ArrowLeftIcon, CodeBracketIcon, CommandLineIcon, CpuChipIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 export default function LearnMore() {
+  const navigate = useNavigate();
+  
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <a href="/" className="flex items-center text-gray-600 hover:text-gray-800">
-            <ArrowLeftIcon className="h-5 w-5 mr-1" />
-            Back to Home
-          </a>
-        </div>
-      </nav>
+      <header className="py-8 px-8 md:px-12 lg:px-24 flex justify-between items-center slide-up">
+        <button 
+          onClick={() => navigate('/')} 
+          className="display-font text-2xl font-bold tracking-tight text-[#f8f9fa] flex items-center gap-2 hover:opacity-70 transition-opacity"
+        >
+          <ArrowLeftIcon className="h-5 w-5 text-[#caf0f8]" />
+          EchoSign
+        </button>
+      </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12 prose">
+      <main className="flex-1 px-8 md:px-12 lg:px-24 py-12 slide-up" style={{ animationDelay: '0.1s' }}>
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            <span className="text-indigo-600">Sign Language</span> Recognition System
+        <div className="mb-24">
+          <div className="text-xs uppercase tracking-widest text-[#525252] mb-4">Documentation</div>
+          <h1 className="text-5xl md:text-6xl display-font leading-none mb-8 text-[#f8f9fa]">
+            Sign Language <br /> <span className="text-[#caf0f8]">Recognition.</span>
           </h1>
-          <p className="text-xl text-gray-600">
-            Bridging communication gaps through AI-powered sign language interpretation
+          <p className="font-light text-lg max-w-xl leading-relaxed text-[#a3a3a3]">
+            Bridging communication gaps through AI-powered sign language interpretation and real-time motion analysis.
           </p>
+          <div className="thin-line mt-12"></div>
         </div>
 
         {/* Project Overview */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-            <CodeBracketIcon className="h-6 w-6 mr-2 text-indigo-600" />
-            Project Overview
-          </h2>
+        <section className="mb-24 grid md:grid-cols-12 gap-16">
+          <div className="md:col-span-4">
+            <h2 className="display-font text-3xl text-[#f8f9fa] mb-6">Overview</h2>
+            <div className="text-xs uppercase tracking-widest text-[#525252]">The core technology stack</div>
+          </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4 text-indigo-600">
-                Backend System
-              </h3>
-              <p className="text-gray-600 mb-4">
+          <div className="md:col-span-8 grid md:grid-cols-2 gap-12">
+            <div className="border border-[#1a1a1a] p-8">
+              <h3 className="display-font text-xl mb-4 text-[#caf0f8]">Backend System</h3>
+              <p className="text-[#a3a3a3] font-light leading-relaxed mb-6 text-sm">
                 Powered by FastAPI, our robust backend handles image processing and 
-                machine learning inference with efficiency and scalability.
+                machine learning inference with efficiency.
               </p>
-              <ul className="list-disc pl-6 text-gray-600 space-y-2">
-                <li>RESTful API architecture</li>
-                <li>Machine learning model integration</li>
-                <li>Asynchronous processing</li>
-                <li>Scalable cloud deployment</li>
+              <ul className="space-y-3 text-xs uppercase tracking-widest text-[#525252]">
+                <li>• RESTful API</li>
+                <li>• ML Model Integration</li>
+                <li>• Async Processing</li>
               </ul>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4 text-indigo-600">
-                Frontend Interface
-              </h3>
-              <p className="text-gray-600 mb-4">
+            <div className="border border-[#1a1a1a] p-8">
+              <h3 className="display-font text-xl mb-4 text-[#caf0f8]">Frontend Interface</h3>
+              <p className="text-[#a3a3a3] font-light leading-relaxed mb-6 text-sm">
                 Modern React-based interface designed for seamless user experience 
                 and intuitive interaction.
               </p>
-              <ul className="list-disc pl-6 text-gray-600 space-y-2">
-                <li>Responsive design</li>
-                <li>Real-time feedback</li>
-                <li>Interactive visualization</li>
-                <li>Cross-browser compatibility</li>
+              <ul className="space-y-3 text-xs uppercase tracking-widest text-[#525252]">
+                <li>• Responsive UI</li>
+                <li>• Real-time Feedback</li>
+                <li>• Custom Motion Logic</li>
               </ul>
             </div>
           </div>
         </section>
 
         {/* API Documentation */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
-            <CommandLineIcon className="h-6 w-6 mr-2 text-indigo-600" />
-            API Endpoint Documentation
-          </h2>
+        <section className="mb-24 grid md:grid-cols-12 gap-16">
+          <div className="md:col-span-4">
+            <h2 className="display-font text-3xl text-[#f8f9fa] mb-6">API</h2>
+            <div className="text-xs uppercase tracking-widest text-[#525252]">Endpoint documentation</div>
+          </div>
 
-          <div className="bg-gray-900 p-6 rounded-lg text-gray-100">
-            <div className="mb-4">
-              <span className="text-indigo-400 font-mono">POST</span>
-              <span className="ml-2 font-mono">/predict</span>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-semibold text-gray-400 mb-1">Request</h4>
-                <pre className="p-4 bg-gray-800 rounded text-sm">
-{`{
-  "file": "image/jpeg"  // Hand gesture image
-}`}</pre>
+          <div className="md:col-span-8">
+            <div className="border border-[#1a1a1a] p-8 bg-[#0d0d0d]">
+              <div className="mb-8 flex items-center gap-4">
+                <span className="text-[#caf0f8] font-bold display-font">POST</span>
+                <span className="text-[#f8f9fa] font-light opacity-50">/predict</span>
               </div>
+              
+              <div className="grid md:grid-cols-2 gap-12">
+                <div>
+                  <h4 className="text-[10px] uppercase tracking-widest text-[#525252] mb-4">Request Body</h4>
+                  <pre className="text-xs text-[#a3a3a3] font-mono leading-relaxed">
+{`{
+  "file": "image/jpeg"
+}`}
+                  </pre>
+                </div>
 
-              <div>
-                <h4 className="text-sm font-semibold text-gray-400 mb-1">Response</h4>
-                <pre className="p-4 bg-gray-800 rounded text-sm">
+                <div>
+                  <h4 className="text-[10px] uppercase tracking-widest text-[#525252] mb-4">Response Object</h4>
+                  <pre className="text-xs text-[#caf0f8] font-mono leading-relaxed">
 {`{
   "prediction": "A",
-  "confidence": 0.97,
-  "timestamp": "2024-01-20T12:34:56Z"
-}`}</pre>
+  "confidence": 0.97
+}`}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>

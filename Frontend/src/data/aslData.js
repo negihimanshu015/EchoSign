@@ -70,11 +70,15 @@ export const signInstructions = {
         commonMistakes: ["Accidentally extending the ring finger", "Not forming a complete fist"],
     },
     J: {
+        isMotion: true,
         steps: [
             "Trace a 'J' shape in the air with your pinky finger",
             "Keep your hand steady while drawing the curve",
         ],
-        commonMistakes: ["Incomplete trace", "Using the wrong finger"],
+        commonMistakes: [
+            "Incomplete trace",
+            "Using the wrong finger",
+        ],
     },
     K: {
         steps: [
@@ -182,6 +186,7 @@ export const signInstructions = {
         commonMistakes: ["Unintentionally extending the index finger", "Too tense of a hand posture"],
     },
     Z: {
+        isMotion: true,
         steps: [
             "Using your index finger, trace a 'Z' shape in the air",
             "Keep your hand steady throughout the gesture",

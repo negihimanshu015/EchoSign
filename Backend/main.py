@@ -1,20 +1,54 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+import os
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import cv2
 import mediapipe as mp
 import joblib
-from typing import List
 
-app = FastAPI()
+# Constants
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "sign_language_svm.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl")
 
-# Load models
-svm_model = joblib.load("sign_language_svm.pkl")
-scaler = joblib.load("scaler.pkl")
+# Initialize Limiter
+limiter = Limiter(key_func=get_remote_address)
 
-# Initialize MediaPipe Hands
+# Initialize MediaPipe Hands globally for reuse
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.5)
+hands_model = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Load models and initialize MediaPipe
+    global hands_model, svm_model, scaler
+    try:
+        svm_model = joblib.load(MODEL_PATH)
+        scaler = joblib.load(SCALER_PATH)
+        hands_model = mp_hands.Hands(
+            static_image_mode=False,
+            max_num_hands=1, 
+            min_detection_confidence=0.5
+        )
+        print("Models and MediaPipe initialized successfully")
+    except Exception as e:
+        print(f"Error during startup: {e}")
+        raise e
+        
+    yield
+    
+    # Shutdown: Clean up resources
+    if hands_model:
+        hands_model.close()
+        print("MediaPipe resources closed")
+
+app = FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,7 +58,11 @@ app.add_middleware(
 )
 
 @app.post("/predict")
-async def predict_sign(file: UploadFile = File(...)):
+@limiter.limit("5/second")
+async def predict_sign(request: Request, file: UploadFile = File(...)):
+    if hands_model is None:
+        raise HTTPException(status_code=503, detail="Models not initialized")
+        
     try:
         # Read image file
         contents = await file.read()
@@ -37,7 +75,7 @@ async def predict_sign(file: UploadFile = File(...)):
         # Process with MediaPipe
         frame = cv2.flip(frame, 1)
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = hands.process(rgb_frame)
+        results = hands_model.process(rgb_frame)
         
         if not results.multi_hand_landmarks:
             return {"sign": "no_hand", "confidence": 0.0}
@@ -51,13 +89,16 @@ async def predict_sign(file: UploadFile = File(...)):
         landmarks = scaler.transform(landmarks)
         
         # Make prediction
-        prediction = svm_model.predict(landmarks)[0]
-        confidence = svm_model.predict_proba(landmarks)[0].max()
+        prediction = svm_model.predict(landmarks)[0]        
+        probs = svm_model.predict_proba(landmarks)[0]
+        confidence = float(probs.max())
         
         return {
             "sign": str(prediction),
-            "confidence": float(confidence)
+            "confidence": confidence
         }
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

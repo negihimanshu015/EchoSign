@@ -1,89 +1,71 @@
-# Sign Language Recognition System
+# EchoSign
 
-This project is a Sign Language Recognition System that utilizes a FastAPI backend for processing images and a React frontend for user interaction. The system predicts sign language gestures from images using machine learning models.
+![EchoSign](https://img.shields.io/badge/Status-Active-brightgreen.svg) ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-blue) ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688) ![Machine Learning](https://img.shields.io/badge/ML-MediaPipe%20%2B%20SVM-orange)
 
-## Project Overview
+## Description
+EchoSign is an interactive sign language learning platform that provides real-time, computer-vision-based feedback. The application features a clean user interface built with React and Tailwind CSS. Under the hood, a FastAPI backend processes webcam streams using MediaPipe for precise hand landmark detection, and utilizes a trained Support Vector Machine  model to accurately classify sign language gestures.
 
-The project consists of two main components:
-- **Backend**: A FastAPI application that handles image uploads and predicts sign language gestures.
-- **Frontend**: A React application that provides a user interface for uploading images and displaying predictions.
+## Motivation
+Learning sign language can be challenging without immediate, accurate feedback. Traditional learning materials like books or videos can't tell you if you are forming the signs correctly. This project aims to bridge this gap by offering an accessible, browser-based practice environment. By providing real-time corrections and an intuitive, secure interface, EchoSign helps users practice confidently without needing specialized hardware.
 
-## Backend Details
+## Quick Start
 
-The backend is built using FastAPI and includes the following features:
+### Prerequisites
+- **Node.js** (v18 or newer)
+- **Python** (3.9 or newer)
+- A working webcam
 
-### Predict Endpoint
+### Installation
 
-- **Endpoint**: `/predict`
-- **Method**: POST
-- **Description**: Accepts an image file and returns the predicted sign language gesture along with the confidence score.
-- **Request**: 
-  - File: An image file containing a hand gesture.
-- **Response**: 
-  - JSON object containing the predicted sign and confidence score.
-
-### Running the Backend
-
-1. Install the required dependencies:
-   ```bash
-   pip install fastapi uvicorn opencv-python mediapipe joblib
-   ```
-2. Run the application:
-   ```bash
-   uvicorn main:app --reload
-   ```
-
-## Frontend Details
-
-The frontend is built using React and Vite. It provides a user-friendly interface for interacting with the backend.
-
-### Running the Frontend
-
-1. Install the required dependencies:
-   ```bash
-   npm install
-   ```
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-**Note:** If you want to run this project locally, update the following line in `Frontend/src/learning.jsx`:
-
-```js
-try {
-  const response = await axios.post("https://dusty-noel-negihimanshu015-8d53b982.koyeb.app/predict", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-```
-
-to point to your local server, for example:
-
-```js
-try {
-  const response = await axios.post("http://localhost:8000/predict", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-```
-
-## Installation Instructions
-
-To set up the project, clone the repository and install the dependencies for both the backend and frontend.
-
+**1. Clone the repository:**
 ```bash
-git clone <repository-url>
-cd Backend
-pip install -r requirements.txt
-cd ../Frontend
-npm install
+git clone https://github.com/negihimanshu015/EchoSign.git
+cd EchoSign
 ```
 
-## Usage Instructions
+**2. Backend Setup:**
+```bash
+cd Backend
+# Create a virtual environment
+python -m venv venv
 
-1. Start the backend server.
-2. Start the frontend development server.
-3. Open the frontend application in your browser and upload an image to get predictions.
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+# source venv/bin/activate
 
-## License
+# Install dependencies
+pip install -r requirements.txt
 
-This project is licensed under the MIT License.
+# Run the backend server
+uvicorn main:app --reload
+```
+The backend API will run at `http://localhost:8000`.
+
+**3. Frontend Setup:**
+Open a new terminal window/tab:
+```bash
+cd Frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+## Usage
+1. Open your web browser and navigate to `http://localhost:5173` (or the local URL provided by Vite).
+2. Allow the application to access your webcam when prompted. (Camera access is strictly local and secure).
+3. Form the sign with your hand in front of the camera.
+4. The application will instantly read your hand landmarks and display real-time prediction feedback!
+
+## Contributing
+Contributions are what make the open source community. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/FeatureName`)
+3. Commit your Changes (`git commit -m 'Add some FeatureName'`)
+4. Push to the Branch (`git push origin feature/FeatureName`)
+5. Open a Pull Request

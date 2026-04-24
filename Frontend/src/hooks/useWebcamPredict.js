@@ -2,8 +2,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import axios from "axios";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
-const STREAK_REQUIRED = 4;
-const POLL_INTERVAL_MS = 300;
+const STREAK_REQUIRED = 8;
+const POLL_INTERVAL_MS = 150;
 const CONFIDENCE_THRESHOLD = 0.65;
 
 export const useWebcamPredict = (targetSign, apiUrl = `${API_BASE_URL}/predict`) => {
@@ -47,7 +47,13 @@ export const useWebcamPredict = (targetSign, apiUrl = `${API_BASE_URL}/predict`)
             const formData = new FormData();
             formData.append("file", blob, "frame.jpg");
 
-            const response = await axios.post(apiUrl, formData);
+            const headers = {};
+            const hfToken = import.meta.env.VITE_HF_TOKEN;
+            if (hfToken) {
+                headers["Authorization"] = `Bearer ${hfToken}`;
+            }
+
+            const response = await axios.post(apiUrl, formData, { headers });
             const detectedSign = response.data.sign;
             const confidence = response.data.confidence;
             const confidencePct = Math.round(confidence * 100);
@@ -90,7 +96,7 @@ export const useWebcamPredict = (targetSign, apiUrl = `${API_BASE_URL}/predict`)
 
         const loop = async () => {
             if (stopRef.current) return;
-            if (!isConfirmedRef.current) await captureAndPredict();
+            if (!isConfirmedRef.current) captureAndPredict(); // Don't await; poll at fixed frequency
             if (!stopRef.current) setTimeout(loop, POLL_INTERVAL_MS);
         };
 

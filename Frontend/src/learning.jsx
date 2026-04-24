@@ -8,6 +8,7 @@ import SignCard from "./components/SignCard";
 import CameraPanel from "./components/CameraPanel";
 import AlphabetMap from "./components/AlphabetMap";
 import SuccessOverlay from "./components/SuccessOverlay";
+import ConfirmationModal from "./components/ConfirmationModal";
 
 const LearningPage = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const LearningPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [reviewLetters, setReviewLetters] = useState([]);
   const [isManualMode, setIsManualMode] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   // -- PREDICTION HOOK --
   const { 
@@ -99,7 +101,10 @@ const LearningPage = () => {
   // Effect to trigger success overlay when hook confirms
   useEffect(() => {
     if (isConfirmed) {
-      handleSuccess();
+      const timer = setTimeout(() => {
+        handleSuccess();
+      }, 350); // Synced with the 300ms smooth transition
+      return () => clearTimeout(timer);
     }
   }, [isConfirmed, handleSuccess]);
 
@@ -109,16 +114,19 @@ const LearningPage = () => {
   };
 
   const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
-      localStorage.removeItem('echosign_mastered');
-      localStorage.removeItem('echosign_sessions');
-      setCompletedLetters([]);
-      setSessionCount(1);
-      setTargetSign("A");
-      setIsManualMode(false);
-      resetStreak();
-      setIsConfirmed(false);
-    }
+    setShowResetModal(true);
+  };
+
+  const confirmReset = () => {
+    localStorage.removeItem('echosign_mastered');
+    localStorage.removeItem('echosign_sessions');
+    setCompletedLetters([]);
+    setSessionCount(1);
+    setTargetSign("A");
+    setIsManualMode(false);
+    resetStreak();
+    setIsConfirmed(false);
+    setShowResetModal(false);
   };
 
   const jumpToLetter = (letter) => {
@@ -135,6 +143,14 @@ const LearningPage = () => {
       {showSuccess && (
         <SuccessOverlay letter={targetSign} onComplete={advanceQueue} />
       )}
+
+      <ConfirmationModal 
+        isOpen={showResetModal}
+        onConfirm={confirmReset}
+        onCancel={() => setShowResetModal(false)}
+        title="Reset Progress?"
+        message="This will clear all your mastered signs and reset your learning sessions. This action cannot be undone."
+      />
 
       {/* Header */}
       <header className="h-14 shrink-0 flex items-center justify-between px-8 border-b border-[#1a1a1a]">

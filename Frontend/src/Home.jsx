@@ -14,12 +14,11 @@ const HomePage = () => {
       {/* Hero Section */}
       <main className="flex-1 px-8 md:px-12 lg:px-24 grid grid-cols-1 md:grid-cols-12 gap-16 items-center slide-up" style={{ animationDelay: '0.2s' }}>
         <div className="md:col-span-5 flex flex-col justify-center">
-          <div className="mb-4 text-xs uppercase tracking-widest text-[#525252]">Interactive ASL</div>
           <h1 className="text-6xl md:text-7xl display-font leading-none mb-8 text-[#f8f9fa]">
             Speak <br /> <span className="text-[#caf0f8]">With Hands</span>
           </h1>
           <p className="font-light text-lg mb-12 max-w-sm leading-relaxed text-[#a3a3a3]">
-            Master American Sign Language in a distraction-free environment.
+            Master American Sign Language through interactive learning.
           </p>
           <div className="thin-line mb-8"></div>
           <div className="flex gap-4 items-center">

@@ -15,9 +15,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "sign_language_svm.pkl")
 SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl")
 
-# Initialize Limiter
-limiter = Limiter(key_func=get_remote_address)
+# Initialize Limiter with strict client IP to prevent X-Forwarded-For spoofing
+def get_real_ip(request: Request) -> str:
+    return request.client.host if request.client else "127.0.0.1"
 
+limiter = Limiter(key_func=get_real_ip)
 # Initialize MediaPipe Hands globally for reuse
 mp_hands = mp.solutions.hands
 hands_model = None
@@ -46,16 +48,40 @@ async def lifespan(app: FastAPI):
         hands_model.close()
         print("MediaPipe resources closed")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, strict_slashes=False)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["POST", "GET"],
+    allow_headers=["Content-Type"],
 )
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 MB
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
+@app.get("/")
+async def root():
+    return {
+        "message": "EchoSign API is running",
+        "endpoints": {
+            "predict": "/predict (POST)",
+            "health": "/health (GET)"
+        }
+    }
 
 @app.post("/predict")
 @limiter.limit("10/second")
@@ -63,9 +89,14 @@ async def predict_sign(request: Request, file: UploadFile = File(...)):
     if hands_model is None:
         raise HTTPException(status_code=503, detail="Models not initialized")
         
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(status_code=415, detail="Unsupported file type")
+
     try:
-        # Read image file
-        contents = await file.read()
+        # Read image file (enforce size limit)
+        contents = await file.read(MAX_FILE_SIZE + 1)
+        if len(contents) > MAX_FILE_SIZE:
+            raise HTTPException(status_code=413, detail="File too large (max 2 MB)")
         nparr = np.frombuffer(contents, np.uint8)
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
@@ -98,10 +129,12 @@ async def predict_sign(request: Request, file: UploadFile = File(...)):
             "confidence": confidence
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/health")
 async def health_check():

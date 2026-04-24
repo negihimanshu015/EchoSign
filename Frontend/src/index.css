@@ -100,7 +100,7 @@
 }
 
 .animate-ring-fill {
-  transition: stroke-dashoffset 0.4s ease-out;
+  transition: stroke-dashoffset 0.3s ease-out;
 }
 
 .animate-pulse-ring {

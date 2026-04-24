@@ -31,6 +31,12 @@ const CameraPanel = ({
             ref={webcamRef}
             className="w-full h-full object-cover opacity-80"
             screenshotFormat="image/jpeg"
+            screenshotQuality={0.6}
+            videoConstraints={{
+              width: 640,
+              height: 480,
+              facingMode: "user"
+            }}
             mirrored
           />
         )}

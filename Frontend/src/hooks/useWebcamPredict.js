@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
 const STREAK_REQUIRED = 4;
 const POLL_INTERVAL_MS = 300;
 const CONFIDENCE_THRESHOLD = 0.65;

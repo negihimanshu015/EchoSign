@@ -1,4 +1,3 @@
-import React from 'react';
 import { ASL_ALPHABET } from '../data/aslData';
 
 const AlphabetMap = ({ completedLetters, activeLetter, onSelect, reviewLetters = [] }) => {

@@ -1,7 +1,5 @@
 # EchoSign
 
-![EchoSign](https://img.shields.io/badge/Status-Active-brightgreen.svg) ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-blue) ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688) ![Machine Learning](https://img.shields.io/badge/ML-MediaPipe%20%2B%20SVM-orange)
-
 ## Description
 EchoSign is an interactive sign language learning platform that provides real-time, computer-vision-based feedback. The application features a clean user interface built with React and Tailwind CSS. Under the hood, a FastAPI backend processes webcam streams using MediaPipe for precise hand landmark detection, and utilizes a trained Support Vector Machine  model to accurately classify sign language gestures.
 

@@ -7,8 +7,10 @@ const HoldRing = ({ streak, streakRequired }) => {
   const radius = 108;
   const strokeWidth = 4;
   const circumference = 2 * Math.PI * radius;
-  const progress = streakRequired > 0 ? streak / streakRequired : 0;
-  const offset = circumference * (1 - Math.min(progress, 1));
+  // Step the progress in 1/4 increments
+  const rawProgress = streakRequired > 0 ? streak / streakRequired : 0;
+  const steppedProgress = Math.floor(rawProgress * 4) / 4;
+  const offset = circumference * (1 - Math.min(steppedProgress, 1));
 
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

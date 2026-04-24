@@ -1,4 +1,3 @@
-import React from 'react';
 import { signInstructions } from '../data/aslData';
 
 const SignCard = ({ letter, onManualConfirm }) => {
@@ -9,7 +8,7 @@ const SignCard = ({ letter, onManualConfirm }) => {
     <div className="bg-[#111111] border border-[#1a1a1a] p-6 h-full flex flex-col">
       <div className="mb-4">
         <span className="text-xs uppercase tracking-[0.2em] text-[#525252] font-bold">Target Sign</span>
-        <div className="text-9xl font-bold text-[#f8f9fa] display-font mt-1 text-center">{letter}</div>
+        <div className="text-9xl font-bold text-[#f8f9fa] no -font mt-1 text-center">{letter}</div>
         {isMotion && (
           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-[#caf0f8]/10 border border-[#caf0f8]/20 rounded-full">
             <div className="w-2 h-2 bg-[#caf0f8] rounded-full animate-pulse" />

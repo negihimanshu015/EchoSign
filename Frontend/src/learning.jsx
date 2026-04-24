@@ -103,7 +103,7 @@ const LearningPage = () => {
     if (isConfirmed) {
       const timer = setTimeout(() => {
         handleSuccess();
-      }, 800); // Synced with the 0.8s fluid glide duration
+      }, 300); // Snappier match for the 0.15s "click" animation
       return () => clearTimeout(timer);
     }
   }, [isConfirmed, handleSuccess]);

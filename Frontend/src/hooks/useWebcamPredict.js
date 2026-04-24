@@ -2,81 +2,101 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const STREAK_REQUIRED = 4;
+const POLL_INTERVAL_MS = 300;
+const CONFIDENCE_THRESHOLD = 0.65;
 
 export const useWebcamPredict = (targetSign, apiUrl = `${API_BASE_URL}/predict`) => {
     const [accuracy, setAccuracy] = useState(0);
     const [prediction, setPrediction] = useState("");
     const [isPredicting, setIsPredicting] = useState(false);
     const [streak, setStreak] = useState(0);
-    const streakRequired = 4;
     const [isConfirmed, setIsConfirmed] = useState(false);
     const webcamRef = useRef(null);
+
+    // Refs so the polling loop always reads latest values without being recreated
     const isFetchingRef = useRef(false);
+    const isConfirmedRef = useRef(false);
+    const isPredictingRef = useRef(false);
+    const targetSignRef = useRef(targetSign);
+    const streakRef = useRef(0);
+    const stopRef = useRef(false);
+
+    // Keep refs in sync
+    useEffect(() => { targetSignRef.current = targetSign; }, [targetSign]);
+    useEffect(() => { isConfirmedRef.current = isConfirmed; }, [isConfirmed]);
+    useEffect(() => { isPredictingRef.current = isPredicting; }, [isPredicting]);
 
     const resetStreak = useCallback(() => {
+        streakRef.current = 0;
         setStreak(0);
         setIsConfirmed(false);
+        isConfirmedRef.current = false;
     }, []);
 
     const captureAndPredict = useCallback(async () => {
-        // Prevent overlapping requests
-        if (!webcamRef.current || isConfirmed || isFetchingRef.current) return;
-        
+        if (!webcamRef.current || isConfirmedRef.current || isFetchingRef.current) return;
+
         const imageSrc = webcamRef.current.getScreenshot();
         if (!imageSrc) return;
 
         isFetchingRef.current = true;
-
         try {
-            // More efficient way to convert data URL to Blob
             const response_blob = await fetch(imageSrc);
             const blob = await response_blob.blob();
-
             const formData = new FormData();
             formData.append("file", blob, "frame.jpg");
 
             const response = await axios.post(apiUrl, formData);
-
             const detectedSign = response.data.sign;
             const confidence = response.data.confidence;
             const confidencePct = Math.round(confidence * 100);
 
+            console.log(`Detected: ${detectedSign} (${confidencePct}%), Target: ${targetSignRef.current}`);
             setPrediction(detectedSign === "no_hand" ? "No hand detected" : detectedSign);
             setAccuracy(confidencePct);
 
-            if (detectedSign === targetSign && confidence >= 0.70) {
-                setStreak(prev => {
-                    const next = prev + 1;
-                    if (next >= streakRequired) {
-                        setIsConfirmed(true);
-                    }
-                    return next;
-                });
+            if (detectedSign === targetSignRef.current && confidence >= CONFIDENCE_THRESHOLD) {
+                // Correct sign — increment streak
+                const next = Math.min(streakRef.current + 1, STREAK_REQUIRED);
+                streakRef.current = next;
+                setStreak(next);
+                if (next >= STREAK_REQUIRED) {
+                    isConfirmedRef.current = true;
+                    setIsConfirmed(true);
+                }
+            } else if (detectedSign === "no_hand") {
+                // Lost tracking — ignore frame, don't punish
             } else {
-                setStreak(0);
+                // Wrong sign — gentle decay
+                const next = Math.max(0, streakRef.current - 1);
+                streakRef.current = next;
+                setStreak(next);
             }
         } catch (error) {
-            console.error("Prediction error:", error);
-            setPrediction("Error");
-            setAccuracy(0);
-            setStreak(0);
+            // On 429 (rate limit) or network error — skip frame silently, never reset streak
+            if (error?.response?.status !== 429) {
+                console.warn("Prediction error:", error?.response?.status ?? error.message);
+            }
         } finally {
             isFetchingRef.current = false;
         }
-    }, [apiUrl, targetSign, isConfirmed, streakRequired]);
+    }, [apiUrl]);
 
+    // Self-contained polling loop — only starts/stops on isPredicting change
     useEffect(() => {
-        let timer;
-        if (isPredicting && !isConfirmed) {
-            const run = async () => {
-                await captureAndPredict();
-                // Schedule next run only after the current one finishes
-                timer = setTimeout(run, 400);
-            };
-            run();
-        }
-        return () => clearTimeout(timer);
-    }, [isPredicting, captureAndPredict, isConfirmed]);
+        if (!isPredicting) return;
+        stopRef.current = false;
+
+        const loop = async () => {
+            if (stopRef.current) return;
+            if (!isConfirmedRef.current) await captureAndPredict();
+            if (!stopRef.current) setTimeout(loop, POLL_INTERVAL_MS);
+        };
+
+        loop();
+        return () => { stopRef.current = true; };
+    }, [isPredicting, captureAndPredict]);
 
     return {
         accuracy,
@@ -85,7 +105,7 @@ export const useWebcamPredict = (targetSign, apiUrl = `${API_BASE_URL}/predict`)
         setIsPredicting,
         webcamRef,
         streak,
-        streakRequired,
+        streakRequired: STREAK_REQUIRED,
         isConfirmed,
         setIsConfirmed,
         resetStreak

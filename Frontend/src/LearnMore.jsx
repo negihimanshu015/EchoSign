@@ -18,7 +18,7 @@ export default function LearnMore() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-8 md:px-12 lg:px-24 py-12 slide-up" style={{ animationDelay: '0.1s' }}>
+      <main className="flex-1 px-8 md:px-12 lg:px-24 py-12 slide-up" style={{ animationDelay: '0.2s' }}>
         {/* Hero Section */}
         <div className="mb-24">
           <div className="text-xs uppercase tracking-widest text-[#525252] mb-4">Documentation</div>

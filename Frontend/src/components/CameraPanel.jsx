@@ -2,15 +2,15 @@ import React from 'react';
 import Webcam from 'react-webcam';
 import HoldRing from './HoldRing';
 
-const CameraPanel = ({ 
-  webcamRef, 
-  isPredicting, 
-  setIsPredicting, 
-  prediction, 
-  accuracy, 
-  streak, 
+const CameraPanel = ({
+  webcamRef,
+  isPredicting,
+  setIsPredicting,
+  prediction,
+  accuracy,
+  streak,
   streakRequired,
-  isMotion 
+  isMotion
 }) => {
   return (
     <div className="relative flex flex-col h-full">
@@ -26,12 +26,14 @@ const CameraPanel = ({
           </div>
         )}
 
-        <Webcam
-          ref={webcamRef}
-          className="w-full h-full object-cover opacity-80"
-          screenshotFormat="image/jpeg"
-          mirrored
-        />
+        {isPredicting && (
+          <Webcam
+            ref={webcamRef}
+            className="w-full h-full object-cover opacity-80"
+            screenshotFormat="image/jpeg"
+            mirrored
+          />
+        )}
 
         {isPredicting && (
           <>

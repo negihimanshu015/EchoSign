@@ -27,6 +27,7 @@ const LearningPage = () => {
   const [targetSign, setTargetSign] = useState("A");
   const [showSuccess, setShowSuccess] = useState(false);
   const [reviewLetters, setReviewLetters] = useState([]);
+  const [isManualMode, setIsManualMode] = useState(false);
 
   // -- PREDICTION HOOK --
   const { 
@@ -90,9 +91,10 @@ const LearningPage = () => {
     setIsConfirmed(false);
     resetStreak();
     
-    // We pass the potentially updated completedLetters if we just mastered it
-    setTargetSign(getNextTarget(completedLetters, sessionCount));
-  }, [completedLetters, sessionCount, getNextTarget, resetStreak, setIsConfirmed]);
+    if (!isManualMode) {
+        setTargetSign(getNextTarget(completedLetters, sessionCount));
+    }
+  }, [completedLetters, sessionCount, getNextTarget, resetStreak, setIsConfirmed, isManualMode]);
 
   // Effect to trigger success overlay when hook confirms
   useEffect(() => {
@@ -106,8 +108,22 @@ const LearningPage = () => {
     handleSuccess();
   };
 
+  const handleReset = () => {
+    if (window.confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
+      localStorage.removeItem('echosign_mastered');
+      localStorage.removeItem('echosign_sessions');
+      setCompletedLetters([]);
+      setSessionCount(1);
+      setTargetSign("A");
+      setIsManualMode(false);
+      resetStreak();
+      setIsConfirmed(false);
+    }
+  };
+
   const jumpToLetter = (letter) => {
     setTargetSign(letter);
+    setIsManualMode(completedLetters.includes(letter));
     resetStreak();
     setIsConfirmed(false);
   };
@@ -115,13 +131,13 @@ const LearningPage = () => {
   const isMotion = signInstructions[targetSign]?.isMotion;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0a] text-[#f8f9fa] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-[#f8f9fa] overflow-hidden">
       {showSuccess && (
         <SuccessOverlay letter={targetSign} onComplete={advanceQueue} />
       )}
 
       {/* Header */}
-      <header className="h-20 flex items-center justify-between px-8 border-b border-[#1a1a1a]">
+      <header className="h-14 shrink-0 flex items-center justify-between px-8 border-b border-[#1a1a1a]">
         <div className="flex items-center gap-4">
           <div 
             className="display-font text-xl font-bold tracking-tighter cursor-pointer hover:text-[#caf0f8] transition-colors" 
@@ -131,18 +147,20 @@ const LearningPage = () => {
           </div>
         </div>
         
-        <button 
-          onClick={() => navigate('/')}
-          className="text-[10px] uppercase tracking-widest text-[#f8f9fa] hover:text-[#caf0f8] transition-colors font-bold"
-        >
-          [ Exit ]
-        </button>
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={handleReset}
+            className="text-[10px] uppercase tracking-widest text-white/70 hover:text-[#caf0f8] transition-colors font-bold"
+          >
+            [ Reset Progress ]
+          </button>
+        </div>
       </header>
 
       {/* Main Workspace */}
-      <main className="flex-1 flex flex-col md:flex-row">
+      <main className="flex-1 flex flex-row min-h-0">
         {/* Left Panel: Target & Instructions */}
-        <div className="w-full md:w-1/3 lg:w-1/4 border-r border-[#1a1a1a]">
+        <div className="w-72 shrink-0 border-r border-[#1a1a1a] overflow-y-auto">
           <SignCard 
             letter={targetSign} 
             onManualConfirm={handleManualConfirm} 
@@ -150,7 +168,7 @@ const LearningPage = () => {
         </div>
 
         {/* Right Panel: Camera */}
-        <div className="flex-1 bg-[#0a0a0a]">
+        <div className="flex-1 min-w-0 bg-[#0a0a0a]">
           <CameraPanel
             webcamRef={webcamRef}
             isPredicting={isPredicting}

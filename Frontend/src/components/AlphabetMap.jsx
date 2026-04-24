@@ -3,7 +3,7 @@ import { ASL_ALPHABET } from '../data/aslData';
 
 const AlphabetMap = ({ completedLetters, activeLetter, onSelect, reviewLetters = [] }) => {
   return (
-    <div className="w-full bg-[#0a0a0a] border-t border-[#1a1a1a] py-6 overflow-x-auto">
+    <div className="w-full bg-[#0a0a0a] border-t border-[#1a1a1a] py-3 overflow-x-auto shrink-0">
       <div className="flex gap-2 min-w-max px-8">
         {ASL_ALPHABET.map((letter, index) => {
           const isMastered = completedLetters.includes(letter);

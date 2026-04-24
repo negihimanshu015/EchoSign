@@ -1,36 +1,39 @@
 import React from 'react';
 
 const HoldRing = ({ streak, streakRequired }) => {
-  const radius = 45;
+  const size = 256;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 108;
+  const strokeWidth = 4;
   const circumference = 2 * Math.PI * radius;
-  const progress = (streak / streakRequired) * 100;
-  const offset = circumference - (progress / 100) * circumference;
+  const progress = streakRequired > 0 ? streak / streakRequired : 0;
+  const offset = circumference * (1 - Math.min(progress, 1));
 
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <svg className="w-64 h-64 transform -rotate-90">
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         {/* Background track */}
         <circle
-          cx="128"
-          cy="128"
+          cx={cx}
+          cy={cy}
           r={radius}
           stroke="rgba(255,255,255,0.1)"
-          strokeWidth="4"
+          strokeWidth={strokeWidth}
           fill="transparent"
-          className="scale-[2.5] origin-center"
         />
         {/* Progress ring */}
         <circle
-          cx="128"
-          cy="128"
+          cx={cx}
+          cy={cy}
           r={radius}
           stroke="#caf0f8"
-          strokeWidth="4"
+          strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="scale-[2.5] origin-center animate-ring-fill"
+          className="animate-ring-fill"
         />
       </svg>
       {streak > 0 && (

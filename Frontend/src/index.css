@@ -9,7 +9,13 @@
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, h5, h6, .display-font {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .display-font {
     font-family: 'Syne', sans-serif;
     color: #f8f9fa;
   }
@@ -24,8 +30,8 @@
 
   .slide-up {
     opacity: 0;
-    transform: translateY(20px);
-    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(30px);
+    animation: slideUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   }
 
 }
@@ -38,8 +44,13 @@
 }
 
 @keyframes scan {
-  from { top: 0; }
-  to { top: 100%; }
+  from {
+    top: 0;
+  }
+
+  to {
+    top: 100%;
+  }
 }
 
 .animate-scan {
@@ -48,20 +59,44 @@
 
 @keyframes ring-fill {
 
-  from { stroke-dashoffset: 283; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 283;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes success-flash {
-  0% { background-color: transparent; }
-  50% { background-color: rgba(202, 240, 248, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: transparent;
+  }
+
+  50% {
+    background-color: rgba(202, 240, 248, 0.2);
+  }
+
+  100% {
+    background-color: transparent;
+  }
 }
 
 @keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 0.5; }
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
 }
 
 .animate-ring-fill {

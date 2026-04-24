@@ -5,14 +5,14 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0a]">
+    <div className="h-screen overflow-hidden flex flex-col bg-[#0a0a0a]">
       {/* Navigation Bar */}
-      <header className="py-8 px-8 md:px-12 lg:px-24 flex justify-between items-center slide-up">
+      <header className="py-5 px-8 md:px-12 lg:px-24 flex justify-between items-center slide-up">
         <div className="display-font text-2xl font-bold tracking-tight text-[#f8f9fa]">EchoSign</div>
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 px-8 md:px-12 lg:px-24 grid grid-cols-1 md:grid-cols-12 gap-16 items-center slide-up" style={{ animationDelay: '0.1s' }}>
+      <main className="flex-1 px-8 md:px-12 lg:px-24 grid grid-cols-1 md:grid-cols-12 gap-16 items-center slide-up" style={{ animationDelay: '0.2s' }}>
         <div className="md:col-span-5 flex flex-col justify-center">
           <div className="mb-4 text-xs uppercase tracking-widest text-[#525252]">Interactive ASL</div>
           <h1 className="text-6xl md:text-7xl display-font leading-none mb-8 text-[#f8f9fa]">
@@ -38,7 +38,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="md:col-span-7 flex justify-end slide-up" style={{ animationDelay: '0.2s' }}>
+        <div className="md:col-span-7 flex justify-end slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="w-full max-w-2xl bg-[#0a0a0a] border border-[#1a1a1a] shadow-2xl relative overflow-hidden flex flex-col group">
             {/* Mockup App Header */}
             <div className="h-10 border-b border-[#1a1a1a] flex items-center px-4 justify-between bg-[#111111]">

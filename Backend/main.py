@@ -58,7 +58,7 @@ app.add_middleware(
 )
 
 @app.post("/predict")
-@limiter.limit("5/second")
+@limiter.limit("10/second")
 async def predict_sign(request: Request, file: UploadFile = File(...)):
     if hands_model is None:
         raise HTTPException(status_code=503, detail="Models not initialized")
@@ -102,3 +102,7 @@ async def predict_sign(request: Request, file: UploadFile = File(...)):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "message": "Backend is running"}

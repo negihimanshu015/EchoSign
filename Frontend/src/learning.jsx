@@ -103,7 +103,7 @@ const LearningPage = () => {
     if (isConfirmed) {
       const timer = setTimeout(() => {
         handleSuccess();
-      }, 350); // Synced with the 300ms smooth transition
+      }, 800); // Synced with the 0.8s fluid glide duration
       return () => clearTimeout(timer);
     }
   }, [isConfirmed, handleSuccess]);

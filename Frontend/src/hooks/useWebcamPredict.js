@@ -2,8 +2,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import axios from "axios";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
-const STREAK_REQUIRED = 8;
-const POLL_INTERVAL_MS = 150;
+const STREAK_REQUIRED = 10;
+const POLL_INTERVAL_MS = 200;
 const CONFIDENCE_THRESHOLD = 0.65;
 
 export const useWebcamPredict = (targetSign, apiUrl = `${API_BASE_URL}/predict`) => {

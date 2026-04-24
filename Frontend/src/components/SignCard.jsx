@@ -30,7 +30,7 @@ const SignCard = ({ letter, onManualConfirm }) => {
           </ul>
         </section>
 
-        {instructions?.commonMistakes && (
+        {instructions?.commonMistakes && !isMotion && (
           <section>
             <h4 className="text-[10px] uppercase tracking-[0.2em] text-[#737373] font-bold mb-4">Common Mistakes</h4>
             <ul className="space-y-3">
